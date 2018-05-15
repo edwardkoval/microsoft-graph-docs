@@ -7,23 +7,22 @@ The security API supports two types of authorization:
 - **Application-level authorization**, where there is no signed-in user (for example, a SIEM scenario). The permissions granted to the application determine authorization. </br>Note: this option can also support cases where _Role-Based Access Control_ (aka RBAC) is managed by the application.
 - **User delegated authorization**, where a user who is a member of the AAD tenant is signed in. The user must be a member of an AAD Limited Admin role - either _Security Reader_ or _Securty Administrator_, in addition to the application having been granted the required permissions.
 
-There are two types of client applications: the Microsoft Graph Explorer, and a custom client app. </br> If calling from Graph Explorer:
+If you're calling the security API from Graph Explorer:
 
 - The AAD tenant admin must explicitly grant consent for the requested permissions to the Graph Explorer application.
 - The user must be a member of the Security Reader Limited Admin role in AAD (either _Security Reader_ or _Security Administrator_).
 
-> **Note**: Graph Explorer does not support application-level authorization
+> **Note**: Graph Explorer does not support application-level authorization.
 
-If calling from a custom/your own application:
+If you're calling the security API from a custom or your own application:
+
 
 - The AAD tenant admin must explicitly grant consent to your application. This is required both for application-level authorization as well as for user delegated authorization.
 - If using user delegated authorization, the user must be a member of the _Security Reader_ or _Security Administrator_ Limited Admin role in AAD.
 
-The following section contains a detailed technical explanation of using the Authorization mechanisms.
+## Managing authorization in security API client applications
 
-## Managing authorization in Microsoft Graph Security API client applications
-
-Security data provided via the Microsoft Graph Security API is sensitive and must be protected by appropriate authentication and authorization mechanisms. To register and create a client application that can access the Microsoft Graph Security API, the following steps must be performed:
+Security data provided via the ecurity API in Microsoft Graph is sensitive and must be protected by appropriate authentication and authorization mechanisms. The following table lists the steps to register and create a client application that can access the security API.
 
 | **Who** | **Action** |
 |:---------------------|:------------------|
@@ -47,17 +46,17 @@ Security data provided via the Microsoft Graph Security API is sensitive and mus
 </style>
 
 - **Application registration** only defines which permissions the application needs in order to run. </br>It does NOT grant these permissions to the application.
-- The Azure AD tenant administrator MUST explicitly grant the permissions to the application.</br>This MUST be done per tenant and **performed every time** the application permissions are changed in the application registration portal.
+- The Azure AD tenant administrator MUST explicitly grant the permissions to the application. </br>This MUST be done per tenant and **performed every time** the application permissions are changed in the application registration portal.
 - Let’s assume we have: an application: <b class=blue>App</b>, two AAD tenants: <b class=green>T1</b> and <b class=green>T2</b>, and two scopes, or permissions: <b class=red>P1</b> and <b class=red>P2</b>.
     - Application <b class=blue>App</b> registered to require permission <b class=red>P1</b>.
     - When users in tenant <b class=green>T1</b> get an AAD token for this application, the token does not contain any permissions (see next bullet).
     - The AAD Admin of tenant <b class=green>T1</b> explicitly grants permissions to the application <b class=blue>App</b>. From this moment on, when users in tenant <b class=green>T1</b> get an AAD token for <b class=blue>App</b>, it will contain permission <b class=red>P1</b>.
-    - When users in tenant <b class=green>T2</b> get an AAD token for application <b class=blue>App</b>, the token does not contain any permissions - because the admin of tenant <b class=green>T2</b> did not yet grant permissions to <b class=blue>App</b>.</br>The procedure of granting permission must be performed **per tenant** and **per application**.
+    - When users in tenant <b class=green>T2</b> get an AAD token for application <b class=blue>App</b>, the token does not contain any permissions - because the admin of tenant <b class=green>T2</b> did not yet grant permissions to <b class=blue>App</b>. </br>The procedure of granting permission must be performed **per tenant** and **per application**.
     - The application <b class=blue>App</b> has its registration changed to now require permissions <b class=red>P1</b> and <b class=red>P2</b>.
     - When users in tenant <b class=green>T1</b> get an AAD token for <b class=blue>App</b>, it only contains permission <b class=red>P1</b>. Permissions granted to an application are recorded as snapshots of what was granted - </br>they **do not change automatically** after the application registration (permission) changes.
-    - The admin of tenant <b class=green>T2</b> grants permissions <b class=red>P1</b> and <b class=red>P2</b> to the application <b class=blue>App</b>.</br>From this moment on, when users in tenant <b class=green>T2</b> get AAD token for <b class=blue>App</b>, the token will contain permissions <b class=red>P1</b> and <b class=red>P2</b>.
+    - The admin of tenant <b class=green>T2</b> grants permissions <b class=red>P1</b> and <b class=red>P2</b> to the application <b class=blue>App</b>. </br>From this moment on, when users in tenant <b class=green>T2</b> get AAD token for <b class=blue>App</b>, the token will contain permissions <b class=red>P1</b> and <b class=red>P2</b>.
 
-**Note**: for the same application (<b class=blue>App</b>), the AAD token for the application in tenant <b class=green>T1</b> and that for the application in tenant <b class=green>T2</b> contain different permissions, since the tenant admins each granted different permissions to the application (<b class=blue>App</b>).
+**Note**: for the same application (<b class=blue>App</b>), the AAD token for the application in tenant <b class=green>T1</b> and that for the application in tenant <b class=green>T2</b> contains different permissions, since each tenant admin has granted different permissions to the application (<b class=blue>App</b>).
 
 - To make <b class=blue>App</b> work again in tenant <b class=green>T1</b>, the admin of tenant <b class=green>T1</b> must explicitly grant permissions <b class=red>P1</b> and <b class=red>P2</b> to the application (<b class=blue>App</b>).
 
@@ -70,13 +69,14 @@ Security data provided via the Microsoft Graph Security API is sensitive and mus
 **Application Name:** a string used for the application name. </br>
 **Redirect URL:** where the authentication response from AAD is sent. </br>
 To begin with, you can use the test client web app homepage. </br>
+
 **Required Permissions:** the permissions that your application requires to be able to call Microsoft Graph.
 
 ### What you need to do:
 
 1. Go to https://apps.dev.microsoft.com/ and sign in.</br>**Note**: there is no need to be a tenant admin. You will be redirected to “My applications” list.
 2. Click the “**Add an app**” button, and enter an Application Name to create a new application.
-3. It will navigate to the registration page for the new application.</br>Click “**Add Platform**”, choose “**Web**”. In the Redirect URL, enter the Redirect URL.
+3. It will navigate to the registration page for the new application. </br>Click “**Add Platform**”, choose “**Web**”. In the Redirect URL, enter the Redirect URL.
 4. Go to section “**Microsoft Graph Permissions**” and under “**Delegated Permissions**”, click the “**Add**” button. A popup dialog appears; choose required permissions (aka scopes).</br>See this [document](https://developer.microsoft.com/en-us/graph/docs/concepts/permissions_reference#security-permissions) for detailed scopes. The Microsoft Graph Security API requires “SecurityEvents.Read.All” scope for GET queries, and “SecurityEvents.ReadWrite.All” scope for PATCH/POST queries.
 5. Scroll down to the bottom of the page and click on the “**Save**” button
 
@@ -88,7 +88,7 @@ To begin with, you can use the test client web app homepage. </br>
 
 ## Granting Permissions to an Application
 
-Application registration only defines which permission the application requires - it does not grant these permissions to the application. An Azure AD tenant administrator must explicitly grant these permissions by making a call to the admin consent endpoint.</br>[Reference link](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-scopes#using-the-admin-consent-endpoint)
+Application registration only defines which permission the application requires - it does not grant these permissions to the application. An Azure AD tenant administrator must explicitly grant these permissions by making a call to the admin consent endpoint. </br>[Reference link](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-scopes#using-the-admin-consent-endpoint)
 
 ### What you need:
 
@@ -101,13 +101,13 @@ In a text editor, create following URL string:
 
 `https://login.microsoftonline.com/common/adminconsent?client_id=<Application Id>&state=12345&redirect_uri=<Redirect URL>`
 
-In a web browser, navigate to this URL, and sign in as a tenant administrator; the popup dialog shows the list of permission the application requires, as specified in the application registration portal.</br>Click “**OK**” to grant the application these permissions.
+In a web browser, navigate to this URL, and sign in as a tenant administrator; the popup dialog shows the list of permission the application requires, as specified in the application registration portal. </br>Click “**OK**” to grant the application these permissions.
 
 > **Note:** this step grants permissions to the application - not to users. This means that all users belonging to the AAD tenant that using this application will be granted these permissions - even non-admin users.
 
 ## Assigning AAD roles to users
 
-Once an application is granted permissions, everyone with access to the application (that is, members of the AAD tenant) will receive the granted permissions. To further protect sensitive security data, the Microsoft Graph Security API also requires users be assigned the Azure AD **Security Reader** role.</br>Reference links: [admin role](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-assign-admin-roles-azure-portal),  [assign roles](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-users-assign-role-azure-portal).
+Once an application is granted permissions, everyone with access to the application (that is, members of the AAD tenant) will receive the granted permissions. To further protect sensitive security data, the Microsoft Graph Security API also requires users be assigned the Azure AD **Security Reader** role. </br>Reference links: [admin role](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-assign-admin-roles-azure-portal),  [assign roles](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-users-assign-role-azure-portal).
 
 ### What you need:
 
@@ -118,6 +118,7 @@ A tenant admin must perform this step.
 The admin must:
 
 - Sign in to [azure portal](https://portal.azure.com) (http://portal.azure.com).
+
 - In the menu, select **Azure Active Directory** > **Users**.
 - Select the name of the desired user.
 - Select **Manage** > **Directory role**.
@@ -131,7 +132,7 @@ The admin must:
 ### What you need:
 
 **Application ID:** the application ID from application registration portal.</br>
-**Redirect URL:** where the authentication response from AAD is sent to.</br>To begin, you can use http://localhost or the test client web app homepage.</br>
+**Redirect URL:** where the authentication response from AAD is sent to. </br>To begin, you can use http://localhost or the test client web app homepage.</br>
 **Application Key** (optional): the key of the application, used when developing an application that will use application-only authentication code (i.e. will not support user delegated authentication)
 
 ### What you need to do:
